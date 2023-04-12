@@ -24,6 +24,36 @@ ffmpeg -hide_banner -loglevel error -i "$full" -ss "$jingle_intro_results" -to "
 rm "$full.wav" "$jingleintro.wav" "$jingleoutro.wav"
 exit
 
+elif [ "$1" = "extract-fa" ]; then
+full="$4"
+jingleintro="$2"
+jingleoutro="$3"
+if [[ ! -f "$full" ]] ; then echo "Oops, $full was not found" ; exit ; fi
+if [[ ! -f "$jingleintro" ]] ; then echo "Oops, $jingleintro was not found" ; exit ; fi
+if [[ ! -f "$jingleoutro" ]] ; then echo "Oops, $jingleoutro was not found" ; exit ; fi
+durationoutro=$(ffmpeg -i "$jingleoutro" 2>&1 | grep Duration | awk '{print $2}' | tr -d , | awk -F ':' '{print ($1*3600)+($2*60)+$3}')
+durationfull=$(ffmpeg -i "$full" 2>&1 | grep Duration | awk '{print $2}' | tr -d , | awk -F ':' '{print ($1*3600)+($2*60)+$3}')
+halffull=$(echo "$durationfull/2" | bc)
+echo "Extract the first half of $full in wav"
+ffmpeg -hide_banner -loglevel error -i "$full" -ss 0 -t "$halffull" -c copy "f5_$full.wav"
+echo "Extract the second half of $full in wav"
+ffmpeg -hide_banner -loglevel error -sseof -$halffull -i "$full" -c copy "s5_$full.wav"
+echo "Convert $jingleintro to wav"
+ffmpeg -hide_banner -loglevel error -i "$jingleintro" "$jingleintro.wav"
+echo "Convert $jingleoutro to wav"
+ffmpeg -hide_banner -loglevel error -i "$jingleoutro" "$jingleoutro.wav"
+echo "Research jingle intro on f5_$full:"
+jingle_intro_results=$(python3 mp3adcleaner.py "$jingleintro.wav" "f5_$full.wav")
+echo "Research jingle outro on s5_$full:"
+jingle_outro_check=$(python3 mp3adcleaner.py "$jingleoutro.wav" "s5_$full.wav")
+###check calculation outro
+jingle_outro_results=$(echo "$durationfull - $halffull + $jingle_outro_check + $durationoutro" | bc)
+#Extraction
+ffmpeg -hide_banner -loglevel error -i "$full" -ss "$jingle_intro_results" -to "$jingle_outro_results" -c copy "mp3adcleaner-fa_$full"
+[ -f "mp3adcleaner-fa_$full" ] && echo "mp3adcleaner_$full is ready" || echo "Oops, something is wrong"
+rm "$jingleintro.wav" "$jingleoutro.wav" "s5_$full.wav" "f5_$full.wav"
+exit
+
 elif [ "$1" = "extract-ba" ]; then
 full="$4"
 jingleintro="$2"
@@ -194,6 +224,7 @@ if [[ ! -f "$jingle_intro" ]] ; then echo "Oops, $jingle_intro was not found" ; 
 if [[ ! -f "$jingle_outro" ]] ; then echo "Oops, $jingle_outro was not found" ; exit ; fi
 echo start debug
 ./mp3adcleaner.sh extract "$jingle_intro" "$jingle_outro" "$full"
+./mp3adcleaner.sh extract-fa "$jingle_intro" "$jingle_outro" "$full"
 ./mp3adcleaner.sh extract-ba "$jingle_intro" "$jingle_outro" "$full"
 ./mp3adcleaner.sh extract-fi "$jingle_intro" "$full"
 ./mp3adcleaner.sh extract-aie "$jingle_intro" "$full"
@@ -203,6 +234,7 @@ echo start debug
 ./mp3adcleaner.sh extract-ao "$jingle_outro" "$full"
 echo "Test file:"
 file="mp3adcleaner_$full" ; [ -f "$file" ] && echo -e "[\033[32mOK\033[0m] $file" || echo -e "[\033[31mNOK\033[0m] $file"
+file="mp3adcleaner-fa_$full" ; [ -f "$file" ] && echo -e "[\033[32mOK\033[0m] $file" || echo -e "[\033[31mNOK\033[0m] $file"
 file="mp3adcleaner-ba_$full" ; [ -f "$file" ] && echo -e "[\033[32mOK\033[0m] $file" || echo -e "[\033[31mNOK\033[0m] $file"
 file="mp3adcleaner-fi_$full" ; [ -f "$file" ] && echo -e "[\033[32mOK\033[0m] $file" || echo -e "[\033[31mNOK\033[0m] $file"
 file="mp3adcleaner-aie_$full" ; [ -f "$file" ] && echo -e "[\033[32mOK\033[0m] $file" || echo -e "[\033[31mNOK\033[0m] $file"
@@ -214,21 +246,42 @@ echo end debug
 
 exit
 
-
-
-
 else
 
-  echo "extract from intro to outro:                      ./mp3adcleaner.sh extract jingle_intro jingle_outro full_file"
-  echo "extract after the intro, to before the outro:     ./mp3adcleaner.sh extract-ba jingle_intro jingle_outro full_file"
-  echo "extract from intro to end:                        ./mp3adcleaner.sh extract-fi jingle_intro full_file"
-  echo "extract after intro to end:                       ./mp3adcleaner.sh extract-aie jingle_intro full_file"
-  echo "extract start to outro:                           ./mp3adcleaner.sh extract-sto jingle_outro full_file"
-  echo "extract start to before outro:                    ./mp3adcleaner.sh extract-sbo jingle_outro full_file"
-  echo "extract before intro:                             ./mp3adcleaner.sh extract-bi jingle_intro full_file"
-  echo "extract after outro:                              ./mp3adcleaner.sh extract-ao jingle_outro full_file"
-  echo "extract jingle intro:                             ./mp3adcleaner.sh extract-jingle-intro full_file start_time end_time (time in seconds)"
-  echo "extract jingle outro:                             ./mp3adcleaner.sh extract-jingle-outro full_file start_time end_time (time in seconds)"
-  echo "debug: try all functions except jingle extraction:./mp3adcleaner.sh debug jingle_intro jingle_outro full_file"
+echo "Extract from intro to outro:"
+echo "./mp3adcleaner.sh extract jingle_intro jingle_outro full_file"
+echo ""
+echo "Extract from intro to outro (from first half of the intro and the second half of the outro):"
+echo "./mp3adcleaner.sh extract-fa jingle_intro jingle_outro full_file"
+echo ""
+echo "Extract after the intro, to before the outro:"
+echo "./mp3adcleaner.sh extract-ba jingle_intro jingle_outro full_file"
+echo ""
+echo "Extract from intro to end:"
+echo "./mp3adcleaner.sh extract-fi jingle_intro full_file"
+echo ""
+echo "Extract after intro to end:"
+echo "./mp3adcleaner.sh extract-aie jingle_intro full_file"
+echo ""
+echo "Extract start to outro:"
+echo "./mp3adcleaner.sh extract-sto jingle_outro full_file"
+echo ""
+echo "Extract start to before outro:"
+echo "./mp3adcleaner.sh extract-sbo jingle_outro full_file"
+echo ""
+echo "Extract before intro:"
+echo "./mp3adcleaner.sh extract-bi jingle_intro full_file"
+echo ""
+echo "Extract after outro:"
+echo "./mp3adcleaner.sh extract-ao jingle_outro full_file"
+echo ""
+echo "Extract jingle intro:"
+echo "./mp3adcleaner.sh extract-jingle-intro full_file start_time end_time (time in seconds)"
+echo ""
+echo "Extract jingle outro:"
+echo "./mp3adcleaner.sh extract-jingle-outro full_file start_time end_time (time in seconds)"
+echo ""
+echo "debug:"
+echo "try all functions except jingle extraction:./mp3adcleaner.sh debug jingle_intro jingle_outro full_file"
 exit 1
 fi
