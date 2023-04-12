@@ -1,6 +1,9 @@
 # MP3adCleaner
 Python script (with a lazy mode in the shell) to remove pollution from MP3 files such as advertising.
 
+## Update:
+20230412: new function: Extract from intro to outro (from first half of the intro and the second half of the outro)
+
 ## Installation
 If using the shell script 
 ```shell
@@ -15,7 +18,7 @@ And download the scripts: mp3adcleaner.py & mp3adcleaner.sh
 
 ## How it works?
 The structure of a podcast is often like this:
-![Alt text](https://raw.githubusercontent.com/pocketvince/MP3adCleaner/main/podcast%20structure.PNG?raw=true "Advertisements, pre-podcast discussion, jingle intro, podcast, jingle outro, advertisements")
+![Alt text](https://raw.githubusercontent.com/pocketvince/MP3adCleaner/main/Visual/extract.png?raw=true "Advertisements, pre-podcast discussion, jingle intro, podcast, jingle outro, advertisements")
 For a long podcast, this is not really a problem, but for short podcasts, more than 50% of the audio content is useless.
 
 This is also the case on radio recordings for news.
@@ -35,17 +38,41 @@ Treatment status: 1393000it [01:25, 16319.02it/s]
 or, run the shell script:
 ```shell
 root@pocketvince:~# ./mp3adcleaner.sh
-extract from intro to outro:                      ./mp3adcleaner.sh extract jingle_intro jingle_outro full_file
-extract after the intro, to before the outro:     ./mp3adcleaner.sh extract-ba jingle_intro jingle_outro full_file
-extract from intro to end:                        ./mp3adcleaner.sh extract-fi jingle_intro full_file
-extract after intro to end:                       ./mp3adcleaner.sh extract-aie jingle_intro full_file
-extract start to outro:                           ./mp3adcleaner.sh extract-sto jingle_outro full_file
-extract start to before outro:                    ./mp3adcleaner.sh extract-sbo jingle_outro full_file
-extract before intro:                             ./mp3adcleaner.sh extract-bi jingle_intro full_file
-extract after outro:                              ./mp3adcleaner.sh extract-ao jingle_outro full_file
-extract jingle intro:                             ./mp3adcleaner.sh extract-jingle-intro full_file start_time end_time (time in seconds)
-extract jingle outro:                             ./mp3adcleaner.sh extract-jingle-outro full_file start_time end_time (time in seconds)
-debug: try all functions except jingle extraction:./mp3adcleaner.sh debug jingle_intro jingle_outro full_file
+Extract from intro to outro:
+./mp3adcleaner.sh extract jingle_intro jingle_outro full_file
+
+Extract from intro to outro (from first half of the intro and the second half of the outro):
+./mp3adcleaner.sh extract-fa jingle_intro jingle_outro full_file
+
+Extract after the intro, to before the outro:
+./mp3adcleaner.sh extract-ba jingle_intro jingle_outro full_file
+
+Extract from intro to end:
+./mp3adcleaner.sh extract-fi jingle_intro full_file
+
+Extract after intro to end:
+./mp3adcleaner.sh extract-aie jingle_intro full_file
+
+Extract start to outro:
+./mp3adcleaner.sh extract-sto jingle_outro full_file
+
+Extract start to before outro:
+./mp3adcleaner.sh extract-sbo jingle_outro full_file
+
+Extract before intro:
+./mp3adcleaner.sh extract-bi jingle_intro full_file
+
+Extract after outro:
+./mp3adcleaner.sh extract-ao jingle_outro full_file
+
+Extract jingle intro:
+./mp3adcleaner.sh extract-jingle-intro full_file start_time end_time (time in seconds)
+
+Extract jingle outro:
+./mp3adcleaner.sh extract-jingle-outro full_file start_time end_time (time in seconds)
+
+debug:
+try all functions except jingle extraction:./mp3adcleaner.sh debug jingle_intro jingle_outro full_file
 ```
 
 The shell version uses the python script to find the time of the intro and/or outro and does the automatic cutting with ffmpeg.
@@ -56,6 +83,17 @@ Sample_News: 2 radio recordings cut with the same jingles with a structure (+-) 
 
 I didn't really understand why, but it seems to work better in wav than mp3, so it converts to wav first before continuing.
 I did some tests on videos files, it seems to work too, but not having the use for the moment, I didn't continue to explore (maybe later?).
+
+## Usage (visual)
+![Alt text](https://raw.githubusercontent.com/pocketvince/MP3adCleaner/main/Visual/extract.png?raw=true "extract")
+![Alt text](https://raw.githubusercontent.com/pocketvince/MP3adCleaner/main/Visual/extract-fa.png?raw=true "extract-fa")
+![Alt text](https://raw.githubusercontent.com/pocketvince/MP3adCleaner/main/Visual/extract-ba.png?raw=true "extract-ba")
+![Alt text](https://raw.githubusercontent.com/pocketvince/MP3adCleaner/main/Visual/extract-fi.png?raw=true "extract-fi")
+![Alt text](https://raw.githubusercontent.com/pocketvince/MP3adCleaner/main/Visual/extract-aie.png?raw=true "extract-aie")
+![Alt text](https://raw.githubusercontent.com/pocketvince/MP3adCleaner/main/Visual/extract-sto.png?raw=true "extract-sto")
+![Alt text](https://raw.githubusercontent.com/pocketvince/MP3adCleaner/main/Visual/extract-sbo.png?raw=true "extract-sbo")
+![Alt text](https://raw.githubusercontent.com/pocketvince/MP3adCleaner/main/Visual/extract-bi.png?raw=true "extract-bi")
+![Alt text](https://raw.githubusercontent.com/pocketvince/MP3adCleaner/main/Visual/extract-ao.png?raw=true "extract-ao")
 
 ## Contributing
 
