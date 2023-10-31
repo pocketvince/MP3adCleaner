@@ -1,3 +1,5 @@
+![Alt text](https://raw.githubusercontent.com/pocketvince/MP3adCleaner/main/Visual/mp3adcleaner-transparent.png?raw=true "Logo")
+
 # MP3adCleaner
 Python script (with a lazy mode in the shell) to remove pollution from MP3 files such as advertising.
 
@@ -98,6 +100,8 @@ I did some tests on videos files, it seems to work too, but not having the use f
 ## Contributing
 
 Readme generator: https://www.makeareadme.com/
+
+Logo: https://openai.com/dall-e-2
 
 ## Extra info
 My first approach was to look for a software to do it automatically, but it didn't seem to exist.
