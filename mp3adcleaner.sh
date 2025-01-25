@@ -98,6 +98,31 @@ ffmpeg -hide_banner -loglevel error -i "$full" -ss "$jingle_intro_results" -to "
 rm "$full.wav" "$jingleintro.wav"
 exit
 
+elif [ "$1" = "extract-ficustom" ]; then
+full="$3"
+jingleintro="$2"
+time="$4"
+if [[ ! -f "$full" ]] ; then echo "Oops, $full was not found" ; exit ; fi
+if [[ ! -f "$jingleintro" ]] ; then echo "Oops, $jingleintro was not found" ; exit ; fi
+durationfull=$(ffmpeg -i "$full" 2>&1 | grep Duration | awk '{print $2}' | tr -d , | awk -F ':' '{print ($1*3600)+($2*60)+$3}')
+if ! [[ "$time" =~ ^[0-9]+([.][0-9]+)?$ ]]; then echo "Oops, $time is not a valid number of seconds"; exit; fi
+if (( $(echo "$time > $durationfull" | bc -l) )); then echo "Oops, $time exceeds the duration of $full ($durationfull seconds)"; exit; fi
+echo "Convert $jingleintro to wav"
+ffmpeg -hide_banner -loglevel error -i "$jingleintro" "$jingleintro.wav"
+echo "Extraction of the first $time seconds"
+ffmpeg -hide_banner -loglevel error -i "$full" -t "$time" "$full.wav"
+echo "Research jingle intro in the first $time seconds on $full"
+jingle_intro_results=$(python3 mp3adcleaner.py "$jingleintro" "$full.wav")
+#Extraction
+ffmpeg -hide_banner -loglevel error -i "$full" -ss "$jingle_intro_results" -to "$durationfull" -c copy "mp3adcleaner-ficustom_$full"
+[ -f "mp3adcleaner-ficustom_$full" ] && echo "mp3adcleaner-ficustom_$full is ready" || echo "Oops, something is wrong"
+rm "$full.wav" "$jingleintro.wav"
+exit
+
+
+
+
+
 elif [ "$1" = "extract-aie" ]; then
 full="$3"
 jingleintro="$2"
@@ -259,6 +284,9 @@ echo "./mp3adcleaner.sh extract-ba jingle_intro jingle_outro full_file"
 echo ""
 echo "Extract from intro to end:"
 echo "./mp3adcleaner.sh extract-fi jingle_intro full_file"
+echo ""
+echo "Extract from intro to end by defining a shorter search period starting from the intro jingle"
+echo "./mp3adcleaner.sh extract-ficustom jingle_intro full_file duration-in-seconds-from-start-of-full_file"
 echo ""
 echo "Extract after intro to end:"
 echo "./mp3adcleaner.sh extract-aie jingle_intro full_file"
