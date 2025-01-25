@@ -4,6 +4,8 @@
 Python script (with a lazy mode in the shell) to remove pollution from MP3 files such as advertising.
 
 ## Update:
+20250125: new function: Extract from intro to end by defining a shorter search period starting from the intro jingle, example, search for the intro jingle only in the first 30 seconds of full_file
+
 20230412: new function: Extract from intro to outro (from first half of the intro and the second half of the outro)
 
 ## Installation
@@ -51,6 +53,9 @@ Extract after the intro, to before the outro:
 
 Extract from intro to end:
 ./mp3adcleaner.sh extract-fi jingle_intro full_file
+
+Extract from intro to end by defining a shorter search period starting from the intro jingle
+./mp3adcleaner.sh extract-ficustom jingle_intro full_file duration-in-seconds-from-start-of-full_file
 
 Extract after intro to end:
 ./mp3adcleaner.sh extract-aie jingle_intro full_file
